@@ -1,0 +1,879 @@
+﻿@using System.Data;
+
+@{
+    ViewData["Title"] = "Sensor Data";
+}
+
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+
+<style>
+    .menu-wrapper {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7); /* Adding a shadow effect */
+        max-width: 600px;
+        margin: 20px auto;
+        color: black;
+    }
+
+        .menu-wrapper > .container > h2 {
+            background-color: #D44500; /* Syracuse orange */
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: -20px; /* Adjust the top margin to overlap with the container */
+            color: white;
+        }
+
+    .container {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+
+    .checkbox-row {
+        margin-bottom: 15px;
+    }
+
+    .checkbox-container {
+        display: inline-block;
+        width: 18%;
+        margin-right: 2%;
+        float: left;
+    }
+
+    .checkbox-label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .timeframe-selector {
+        margin-bottom: 15px;
+    }
+
+        .timeframe-selector label,
+        .timeframe-selector input[type="date"] {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%; /* Make the date picker input full width */
+            padding: 8px; /* Add padding to the input */
+            font-size: 16px; /* Increase font size */
+            border-radius: 5px; /* Add border radius */
+            border: 1px solid #ddd; /* Add border */
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+    .button-row {
+        text-align: center;
+    }
+
+    button {
+        background-color: #0F4C81;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #D44500;
+        cursor: pointer;
+        color: white;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* Style for the chart canvas */
+    #chartCanvas {
+        width: 100%;
+        max-width: 400px; /* Adjust the width as needed */
+        height: 300px; /* Adjust the height as needed */
+        margin-top: 20px;
+    }
+
+
+
+    /* For Checkbox Graph Menu */
+    /*.menu-wrapper {
+        background-color: #FFDAB9;*/ /* Background color for the menu */
+    /*padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/ /* Adding a shadow effect */
+    /*max-width: 600px;
+        margin: 20px auto;
+    }*/
+
+    .container {
+        max-width: 90%;
+    }
+
+    .checkbox-row {
+        margin-bottom: 10px;
+        overflow: hidden; /* Clearfix */
+    }
+
+    .checkbox-container {
+        display: inline-block;
+        width: 18%; /* Adjust width to fit 5 checkboxes per row */
+        margin-right: 2%;
+        float: left;
+    }
+
+    .checkbox-label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        transform: scale(1); /* Increase the size of the checkboxes */
+    }
+</style>
+
+<!-- Your table code -->
+@if (Model.SensorData != null && Model.SensorData.Rows.Count > 0)
+{
+    <h1>Sensor Data For @Model.RoomNumber</h1>
+    <ul>
+        @foreach (var sensorName in Model.SensorNames)
+        {
+            <h3><i>@sensorName</i></h3>
+        }
+    </ul>
+
+
+
+    <!-- Insert the menu here -->
+
+    <!-- Your existing Razor view content -->
+    <!-- Add the download button here -->
+
+    <div class="menu-wrapper">
+        <div class="container">
+            <h2>Select Values to Graph</h2>
+            <div class="checkbox-row">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="Pm2pt5" name="PM2.5 (µg/m³)">
+                    <label for="Pm2pt5" class="checkbox-label">PM2.5 (µg/m³)</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="temp" name="Temperature (°C)">
+                    <label for="temp" class="checkbox-label">Temperature (°C)</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="pm10" name="PM10 (µg/m³)">
+                    <label for="pm10" class="checkbox-label">PM10 (µg/m³)</label>
+                </div>
+                @*<div class="checkbox-container">
+                        <input type="checkbox" id="o3" name="O3 (ppm)">
+                        <label for="o3" class="checkbox-label">O3 (ppm)</label>
+                    </div>*@
+                <div class="checkbox-container">
+                    <input type="checkbox" id="humidity" name="Humidity (%)">
+                    <label for="humidity" class="checkbox-label">Humidity (%)</label>
+                </div>
+            </div>
+            <div class="checkbox-row">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="Signal" name="Signal (-)">
+                    <label for="Signal" class="checkbox-label">Signal (-)</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="CO2" name="CO2 (ppm)">
+                    <label for="CO2" class="checkbox-label">CO2 (ppm)</label>
+                </div>
+                @*<div class="checkbox-container">
+                        <input type="checkbox" id="Beep" name="Beep (-)">
+                        <label for="Beep" class="checkbox-label">Beep (-)</label>
+                    </div>*@
+                <div class="checkbox-container">
+                    <input type="checkbox" id="Press" name="Press (hPa)">
+                    <label for="Press" class="checkbox-label">Press (hPa)</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="TVOC" name="TVOC (ppb)">
+                    <label for="TVOC" class="checkbox-label">TVOC (ppb)</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="AIQ" name="AIQ">
+                    <label for="AIQ" class="checkbox-label">AIQ</label>
+                </div>
+                @*<div class="checkbox-container">
+                        <input type="checkbox" id="Motion" name="Motion (-)">
+                        <label for="Motion" class="checkbox-label">Motion (-)</label>
+                    </div>*@
+            </div>
+
+            @*<div class="timeframe-selector">
+                    <label for="timeframe">Select Timeframe:</label>
+                    <select id="timeframe" asp-action="SelectedTimeframe">
+                        <option value="24">24 Hours</option>
+                        <option value="7">7 Days</option>
+                        <option value="30">30 Days</option>
+                        <option value="60">90 Days</option>
+                    </select>
+                </div>*@
+
+            <div class="timeframe-selector">
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date" min="2023-09-28">
+
+
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date" max="" onchange="updateMaxDate()">
+
+
+
+                @*<button onclick="applyTimeframe()">Apply</button>*@
+            </div>
+            <div class="button-row">
+                <button type="button" onclick="submitGraph()">Graph</button>
+            </div>
+        </div>
+    </div>
+
+    <script>function updateMaxDate() {
+            console.log('changing!');
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
+
+            today = yyyy + '-' + mm + '-' + dd;
+            document.getElementById("end-date").setAttribute("max", today);
+        }
+
+        // Add event listener to end date input
+        document.getElementById("end-date").addEventListener("change", updateMaxDate);</script>
+
+
+
+    <div class="download-button-container">
+        <button onclick="downloadData()">Download Data</button>
+    </div>
+
+    <style>
+        .download-button-container {
+            text-align: center; /* Center the button horizontally */
+            margin-top: 20px; /* Add some space between the menu and the button */
+        }
+    </style>
+
+    <script>//function downloadData() {
+        //    // Extract data from the table
+        //    var csvContent = [];
+        //    var rows = document.querySelectorAll("#sensorDataTable tr");
+        //    rows.forEach(function (row) {
+        //        var rowData = [];
+        //        row.querySelectorAll("td").forEach(function (cell) {
+        //            rowData.push(cell.textContent);
+        //        });
+        //        csvContent.push(rowData.join(","));
+        //    });
+
+        //    // Convert to CSV string
+        //    var csvString = csvContent.join("\n");
+
+        //    // Create a Blob containing the CSV data
+        //    var blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+
+        //    // Create a temporary link element to trigger the download
+        //    var link = document.createElement("a");
+        //    link.href = window.URL.createObjectURL(blob);
+        //    link.download = "sensor_data.csv";
+
+        //    // Trigger the download
+        //    document.body.appendChild(link);
+        //    link.click();
+
+        //    // Clean up
+        //    document.body.removeChild(link);
+
+        //}
+
+        function downloadData() {
+            // Extract column headers from the table
+            var headers = Array.from(document.querySelectorAll("#sensorDataTable th")).map(th => th.innerText);
+
+            // Extract data rows from the table
+            var rows = Array.from(document.querySelectorAll("#sensorDataTable tbody tr"));
+
+            // Construct the CSV content
+            var csvContent = [headers.join(",")]; // Add headers as the first row
+            rows.forEach(row => {
+                var rowData = Array.from(row.querySelectorAll("td")).map(td => td.innerText);
+                csvContent.push(rowData.join(","));
+            });
+
+            // Convert CSV content to a string
+            var csvString = csvContent.join("\n");
+
+            // Create a Blob containing the CSV data
+            var blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+
+            // Create a temporary link element to trigger the download
+            var link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "sensor_data.csv";
+
+            // Trigger the download
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+        }</script>
+
+    <table id="sensorDataTable">
+        <thead>
+            <tr>
+                @foreach (DataColumn column in Model.SensorData.Columns)
+                {
+                    <!-- <th>@column.ColumnName</th> -->
+
+                    @*<th onclick="openChartPopup('@column.ColumnName')">@column.ColumnName</th>*@
+                    <th onclick="openChartPopup('@column.ColumnName')">@AddUnits(column.ColumnName)</th>
+                }
+            </tr>
+            @functions {
+                public string AddUnits(string columnName)
+                {
+                    switch (columnName)
+                    {
+                        case "PM2pt5":
+                            return "PM2.5 (µg/m³)";
+                        case "Temp":
+                            return "Temperature (°C)";
+                        case "PM10":
+                            return "PM10 (µg/m³)";
+                        case "O3":
+                            return "O3 (ppm)";
+                        case "Humidity":
+                            return "Humidity (%)";
+                        //case "Signal":
+                        //    return "Signal (-)";
+                        case "CO2":
+                            return "CO2 (ppm)";
+                        //case "Beep":
+                        //    return "Beep (-)";
+                        case "Press":
+                            return "Press (hPa)";
+                        //case "Motion":
+                        //    return "Motion (-)";
+                        case "TVOC":
+                            return "TVOC (ppb)";
+                        default:
+                            return columnName; // If no units are specified, return the column name as is
+                    }
+                }
+            }
+
+        </thead>
+        <tbody>
+            @foreach (DataRow row in Model.SensorData.Rows)
+            {
+                <tr>
+                    @foreach (var item in row.ItemArray)
+                    {
+                        <td>@(item != DBNull.Value ? item.ToString() : "n/a")</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (Model.SensorNames != null && Model.SensorNames.Count > 0)
+{
+    <p>No data returned for the following sensors:</p>
+    <ul>
+        @foreach (var sensorName in Model.SensorNames)
+        {
+            <li>@sensorName</li>
+        }
+    </ul>
+
+
+
+
+    <div class="download-button-container">
+        <button onclick="downloadData()">Download Data</button>
+    </div>
+
+    <script>function downloadData() {
+            // Extract data from the table
+            var csvContent = [];
+            var rows = document.querySelectorAll("#sensorDataTable tr");
+            rows.forEach(function (row) {
+                var rowData = [];
+                row.querySelectorAll("td").forEach(function (cell) {
+                    rowData.push(cell.textContent);
+                });
+                csvContent.push(rowData.join(","));
+            });
+
+            // Convert to CSV string
+            var csvString = csvContent.join("\n");
+
+            // Create a Blob containing the CSV data
+            var blob = new Blob([csvString], { type: "text/csv;charset=utf-8" });
+
+            // Create a temporary link element to trigger the download
+            var link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "sensor_data.csv";
+
+            // Trigger the download
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+        }</script>
+
+    <table id="sensorDataTable">
+        <thead>
+            <tr>
+                <th>DT</th>
+                <th>PM2.5 (µg/m³)</th>
+                <th>Temperature (°C)</th>
+                <th>PM10</th>
+                <th>O3</th>
+                <th>Humidity (%)</th>
+                <th>Signal</th>
+                <th>CO2 (ppm)</th>
+                <th>Beep</th>
+                <th>Press</th>
+                <th>Motion</th>
+                <th>AIQ</th>
+                <th>TVOC</th>
+                <th>Light</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2024-04-10 08:00:00</td>
+                <td>15</td>
+                <td>23.5</td>
+                <td>20</td>
+                <td>0.02</td>
+                <td>50</td>
+                <td>Good</td>
+                <td>700</td>
+                <td>Off</td>
+                <td>1010</td>
+                <td>No</td>
+                <td>25</td>
+                <td>300</td>
+                <td>500</td>
+            </tr>
+            <tr>
+                <td>2024-04-10 09:00:00</td>
+                <td>17</td>
+                <td>24.0</td>
+                <td>22</td>
+                <td>0.03</td>
+                <td>48</td>
+                <td>Good</td>
+                <td>720</td>
+                <td>Off</td>
+                <td>1008</td>
+                <td>No</td>
+                <td>27</td>
+                <td>310</td>
+                <td>520</td>
+            </tr>
+            <!-- Add more rows with data as needed -->
+        </tbody>
+    </table>
+
+
+
+}
+else
+{
+    <p>No sensors found for this room.</p>
+}
+
+<script>// Function to apply timeframe
+    function applyTimeframe() {
+        var selectedOption = document.getElementById('timeframe').value;
+        var endDate = new Date(); // End date is always the current date/time
+        var startDate = new Date();
+
+        // You can perform further actions here, like filtering data based on selected timeframe
+        console.log("Start Date:", startDate);
+        console.log("End Date:", endDate);
+        // You may want to add validation to ensure end date is not before start date, etc.
+
+
+        sessionStorage.setItem('selectedTimeframe', selectedOption);
+
+        window.location.reload();
+    }
+
+    // Function to open a popup window with a chart
+    // Your existing chart-related JavaScript functions go here
+
+    //updateSensorData(startDate, endDate);
+
+
+    window.onload = function () {
+        // Retrieve the selected option from sessionStorage
+        var selectedOption = sessionStorage.getItem('selectedTimeframe');
+
+        // If a selected option is found, set the dropdown menu to that option
+        if (selectedOption !== null) {
+            document.getElementById('timeframe').value = selectedOption;
+        }
+    };</script>
+
+
+<script>// Function to open a popup window with a chart
+    function openChartPopup(columnName) {
+        var values = getChartData(columnName);
+        var dates = getDateTimeData(); // Assuming 'DT' is the column with date values
+        console.log("dates");
+        console.log(dates);
+        console.log(columnName);
+        console.log(values);
+
+        // Extract unique days from the dates
+        var uniqueDays = [...new Set(dates.map(date => date.toDateString()))];
+
+        // Create labels for each passing day
+        var labels = uniqueDays.map(dateString => new Date(dateString));
+
+        var dateObjects = dates.map(timestamp => new Date(timestamp));
+
+        var popup = window.open('', columnName, 'width=800,height=600,top=' + (window.innerHeight / 2 - 200) + ',left=' + (window.innerWidth / 2 - 250));
+        var ctx = popup.document.createElement('canvas');
+        ctx.id = 'chartCanvas';
+        popup.document.body.appendChild(ctx);
+
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dateObjects,
+                datasets: [{
+                    label: columnName,
+                    data: values,
+                    fill: false,
+                    borderColor: '#D44500',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Time"
+                        },
+                        type: 'time',
+                        time: {
+                            unit: 'minute', // You can adjust the time unit based on your preference (e.g., 'hour', 'day')
+                            stepSize: 15, // Adjust the step size to control the spacing of time labels
+                            displayFormats: {
+                                hour: 'HH:mm'
+                            }
+                        },
+                        position: 'bottom'
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: getUnitForColumnName(columnName)
+                        }
+                    }
+                }
+            }
+
+        });
+    }
+
+    @inject BrickSchemaTranslation.CoEBrickAPI _brickAPI
+    @{
+        string uuid = _brickAPI.GetSensorUUID(Model.SensorNames[0])[0];
+
+
+}
+
+function submitGraph333() {
+    var startDate = document.getElementById('start-date').value;
+    var endDate = document.getElementById('end-date').value;
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    const selectedValues = [];
+    checkboxes.forEach(checkbox => {
+        selectedValues.push(checkbox.name);
+    });
+
+    // Assuming the UUID is obtained synchronously
+    console.log(sensorName);
+
+    console.log("@uuid");
+    console.log(selectedValues[0]);
+    console.log(startDate);
+    console.log(endDate);
+
+
+    var data = GetSensorDataWithDateRange("@uuid", selectedValues[0], startDate, endDate);
+}
+
+const sql = require('mssql');
+
+async function GetSensorDataWithDateRange(uuid, measurement, startDate, endDate) {
+    let sensorData = [];
+    try {
+        const config = {
+            dsn: "@Environment.GetEnvironmentVariable("DB_DSN")",
+            database: "@Environment.GetEnvironmentVariable("DB_DATABASE")",
+            user: "@Environment.GetEnvironmentVariable("DB_USER")",
+            password: "@Environment.GetEnvironmentVariable("DB_PASS")",
+            server: "@Environment.GetEnvironmentVariable("DB_SERVER")",
+            options: {
+                trustServerCertificate: true // Assuming similar functionality to TrustServerCertificate=yes
+            }
+        };
+
+
+        await sql.connect(config);
+        const result = await sql.query`
+            SELECT iaq.${measurement}
+            FROM COE.dbo.Sensors as sensors
+            JOIN COE.dbo.IAQ as iaq
+            ON sensors.SensorID = iaq.SensorId
+            WHERE BRICK_UUID = @uuid
+            AND iaq.DT BETWEEN ${startDate} AND ${endDate}
+            ORDER BY iaq.DT DESC`;
+
+        if (result.recordset.length > 0) {
+            sensorData = result.recordset.map(row => parseFloat(row[measurement]));
+        } else {
+            console.log("No rows found.");
+        }
+
+        await sql.close();
+    } catch (err) {
+        console.log(`An error occurred: ${err.message}, ${err}`);
+        return;
+    }
+    console.log("RETURNING SENSOR DATA");
+    console.log(sensorData);
+    return sensorData;
+}
+
+
+
+
+function submitGraph3() {
+    var startDate = document.getElementById('start-date').value;
+    var endDate = document.getElementById('end-date').value;
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    const selectedValues = [];
+    checkboxes.forEach(checkbox => {
+        selectedValues.push(checkbox.name);
+    });
+
+    var measurement = selectedValues[0];
+        var sensorName = "@Model.SensorNames[0]";
+        console.log("sensorName");
+    console.log(sensorName);
+
+    console.log("uuid: " + "@uuid");
+
+}
+
+
+    // Assume jQuery is loaded
+
+    // Function to make the Ajax call
+    function getUUIDFromSensorName(sensorName) {
+        $.ajax({
+            url: '/CoEBrickAPI/GetSensorUUID', // Replace this with the actual endpoint URL
+            method: 'GET',
+            data: { sensor: sensorName },
+            success: function (response) {
+                // Handle the response here
+                console.log('UUID:', response.uuid);
+            },
+            error: function (xhr, status, error) {
+                // Handle errors here
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    // Example usage
+    var sensorName = 'YourSensorName';
+    getUUIDFromSensorName(sensorName);
+
+
+
+
+    function submitGraph() {
+        // Get all checked checkboxes
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        const selectedValues = [];
+        checkboxes.forEach(checkbox => {
+            selectedValues.push(checkbox.name);
+        });
+
+
+        var startDate = document.getElementById('start-date').value;
+        var endDate = document.getElementById('end-date').value;
+
+        console.log("Start and End Date:");
+        console.log(startDate);
+        console.log(endDate);
+
+        // If there are selected values, plot the first one
+        if (selectedValues.length > 0) {
+            const firstColumnName = selectedValues[0];
+            const values = getChartData(firstColumnName);
+            const dates = getDateTimeData(); // Assuming 'DT' is the column with date values
+            const dateObjects = dates.map(timestamp => new Date(timestamp));
+
+            // Open popup window
+            const popup = window.open('', firstColumnName, 'width=800,height=600,top=' + (window.innerHeight / 2 - 200) + ',left=' + (window.innerWidth / 2 - 250));
+            const ctx = popup.document.createElement('canvas');
+            ctx.id = 'chartCanvas';
+            popup.document.body.appendChild(ctx);
+
+            // Generate chart
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dateObjects,
+                    datasets: [{
+                        label: firstColumnName,
+                        data: values,
+                        fill: false,
+                        borderColor: '#D44500',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Time"
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'minute', // You can adjust the time unit based on your preference (e.g., 'hour', 'day')
+                                stepSize: 15, // Adjust the step size to control the spacing of time labels
+                                displayFormats: {
+                                    hour: 'HH:mm'
+                                }
+                            },
+                            position: 'bottom'
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: getUnitForColumnName(firstColumnName)
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+
+    function getUnitForColumnName(columnName) {
+        switch (columnName) {
+            case 'Temp':
+                return 'Temperature (°C)';
+            case 'Humidity':
+                return 'Humidity (%)';
+            // Add more cases for other column names and their units as needed
+            default:
+                return columnName; // Default to just the column name if no unit is specified
+        }
+    }
+
+
+    // Function to reload the page or update sensor data through AJAX
+    function updateSensorData() {
+        location.reload();
+    }
+
+    // Periodically call the updateSensorData function every 5 minutes
+    setInterval(updateSensorData, 300000);
+
+    // Function to get the last 5-10 values for a column
+    function getChartData1(columnName) {
+        // Find the index of the column
+        var columnIndex = Array.from(document.querySelectorAll('#sensorDataTable th')).findIndex(th => th.innerText === columnName);
+
+        // Extract the values from the corresponding column in the table
+        var values = Array.from(document.querySelectorAll('#sensorDataTable tbody tr')).map(row => {
+            var cell = row.cells[columnIndex];
+            return parseFloat(cell.innerText);
+        });
+
+        return values.reverse();
+    }
+
+    function getChartData(columnName) {
+        // Find the index of the column
+        var columnIndex = Array.from(document.querySelectorAll('#sensorDataTable th')).findIndex(th => th.innerText === columnName);
+
+        // Extract the values from the corresponding column in the table
+        var values = Array.from(document.querySelectorAll('#sensorDataTable tbody tr')).map(row => {
+            var cell = row.cells[columnIndex];
+            return cell && cell.innerText ? parseFloat(cell.innerText) : NaN;
+            // Check if 'cell' is defined and 'innerText' is not empty before accessing 'innerText'
+            // If 'cell' is undefined or 'innerText' is empty, return NaN (or any other default value)
+        });
+
+        return values.reverse();
+    }
+
+
+
+
+    function getDateTimeData() {
+        // Find the index of the 'DT' column
+        var columnIndex = Array.from(document.querySelectorAll('#sensorDataTable th')).findIndex(th => th.innerText === 'DT');
+
+        // Extract the date strings from the 'DT' column in the table
+        var dateStrings = Array.from(document.querySelectorAll('#sensorDataTable tbody tr')).map(row => {
+            var cell = row.cells[columnIndex];
+            return cell.innerText;
+        });
+
+        // Convert date strings to Date objects
+        var values = dateStrings.map(dateString => new Date(dateString));
+        //var values = dateStrings.map(dateString => new Date(dateString))
+        //    .filter(date => date >= startDate && date <= endDate);
+
+        return values.reverse();
+    }</script>

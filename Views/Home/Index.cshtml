@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SyracuseCoE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #D44500; /* Syracuse University Orange */
+            color: #002D62; /* Syracuse University Blue */
+        }
+
+        #intro {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(to bottom, #FFFFFF, #DCE1F1); /* White to light blue gradient */
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+        }
+
+        #building-image {
+            max-width: 100%;
+            height: 500px;
+            margin: -100px; /* Adjusted margin-bottom */
+            max-width: 500px; /* Limit the maximum width to 500 pixels */
+        }
+
+        #start-button {
+            background-color: #FF6F00; /* Darker shade of Syracuse University Orange */
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            #start-button:hover {
+                background-color: #FFA040; /* Lighter shade of Syracuse University Orange */
+            }
+    </style>
+</head>
+<body>
+
+    <div id="intro">
+        <img src="~/image/COEbldg.png" alt="SyracuseCoE Building" id="building-image">
+        <p>At SyracuseCoE, our mission is to tackle pressing scientific inquiries to assist moderate-sized urban areas in the Northeastern United States in navigating the challenges posed by climate change and striving towards sustainability, resilience, and equity. Through harnessing existing environmental monitoring networks and implementing novel observations, we aim to develop, validate, and apply advanced models to discern the impacts of climate change-induced extreme events in the coming decades. The research endeavors undertaken here promise to furnish invaluable insights to inform decision-making processes geared towards fostering a more sustainable and resilient urban future.</p>
+        <p>Our primary focus revolves around scrutinizing air pollutant concentrations across various spatial scales, ranging from micro-environments to urban expanses, employing enhanced models in contrast to previous urban modeling endeavors. We are committed to conducting long-term monitoring of diverse air pollutants utilizing updated protocols, complemented by meticulous modeling procedures to validate the outcomes against measurement data. This research initiative aspires to furnish decision-makers with crucial insights indispensable for fortifying cities' resilience amidst the evolving climatic landscape.</p>
+        <p>Join us as we delve into the intricacies of environmental data and embark on a journey towards a greener, healthier, and more resilient urban environment. Together, we can pave the way for a brighter future.</p>
+        <style>
+            .button-link {
+                color: inherit;
+                text-decoration: none;
+            }
+        </style>
+
+        <button id="start-button"><a asp-controller="Home" asp-action="Floors" class="button-link">Click here to get started!</a></button>
+
+
+        <canvas id="myChart" width="400" height="400"></canvas>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            console.log("data");
+
+            console.log('@Model.SensorDataJson');
+
+            var sensorDataJson = JSON.parse('@Html.Raw(Model.SensorDataJson)');
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: sensorDataJson.length }, (_, i) => i + 1),
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: sensorDataJson,
+                        fill: false,
+                        borderColor: '#D44500',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Time"
+                            },
+                            position: 'bottom'
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Temperature (°C)"
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+
+    </div>
+
+</body>
+</html>

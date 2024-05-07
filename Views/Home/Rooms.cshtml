@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "Floors";
+}
+
+<div style="display: flex;">
+    <!-- Sidebar with clickable room numbers -->
+    <div style="width: 200px; border-right: 1px solid #ddd; padding: 10px;">
+        <ul style="list-style-type: none; padding: 0;">
+            @foreach (var room in Model.Rooms)
+            {
+                <li><a asp-controller="Home" asp-action="SensorData" asp-route-room="@room" style="font-size: 20px; font-weight: bold; color: #228B22">@room</a></li>
+            }
+        </ul>
+    </div>
+
+    <!-- Main content (Floor Plan) -->
+    <div style="flex-grow: 1; padding: 20px;">
+        <h1>Rooms on @Model.FloorNumber</h1>
+        <img src="~/image/profile/@(Model.FloorNumber).jpg" alt="@Model.FloorNumber Image" width="1000" height="600" />
+
+    </div>
+
+    
+
+</div>

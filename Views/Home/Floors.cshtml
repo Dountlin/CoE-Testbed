@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Floors";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+    <div style="display: flex;">
+
+        <!-- Sidebar -->
+        <div style="width: 200px; border-right: 1px solid #ddd; padding: 10px;">
+            <ul style="list-style-type: none; padding: 0;">
+                @foreach (var floor in Model.Floors)
+                {
+                    <li><a asp-controller="Home" asp-action="Rooms" asp-route-floor="@floor" style="font-size: 20px; font-weight: bold; color: #228B22 ">Floor @floor.Substring(floor.Length - 1)</a></li>
+
+                }
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div style="flex-grow: 1; padding: 20px; display: flex; flex-direction: column; align-items: center;">
+
+            <!-- Main Title -->
+            <h1 class="display-4">Choose a floor!</h1>
+            @*<p>Learn more about the CoE at our website: <a href="https://ecs.syracuse.edu/research/centers-institutes/syracuse-center-of-excellence-coe-in-environmental-energy-systems" target="_blank" style="color: #007bff;">Website</a>.</p>*@
+
+
+            <!-- Content Section -->
+            <div style="display: flex; flex-grow: 1; padding: 20px;">
+
+                <!-- COEldg Image -->
+                <div class="text-center" style="margin-right: 20px;">
+                    <img src="~/image/CoE_Section.jpg" alt="CoE Building" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);" height="500">
+                </div>
+
+                <!-- Another Image -->
+                @*<div class="text-center">
+                        <img src="~/image/CoE_Section.jpg" alt="Second Image" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);" height="600">
+                    </div>*@
+
+            </div>
+        </div>
+    </div>
+
+</html>
